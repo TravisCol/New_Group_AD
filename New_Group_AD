@@ -1,0 +1,36 @@
+#Import CSV file
+param (
+    [Parameter(Mandatory = $true)]
+    [String]$csvFile
+)
+
+$ADGroups = Import-CSV $csvFile
+
+
+foreach ($Group in $ADGroups)
+{
+
+       $Name   = $Group.name
+       $Description  = $Group.description
+       $OUpath       = $Group.oupath
+       $Scope   = $Group.scope
+       $Category      = $Group.category
+ 
+            if (Get-ADGroup -F {SamAccountName -eq $Name}){
+               #If Group exists write warning:
+               Write-Warning "A group $Name already exists in the Domain."
+            }
+            else
+            {
+
+                New-ADGroup `
+                -SamAccountName $Name `
+                -Name "$Name" `
+                -Path "$OUpath" `
+                -GroupCategory $Category `
+                -GroupScope $Scope `
+                -Description $Description `
+                           
+            
+            }
+}
